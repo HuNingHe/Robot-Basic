@@ -15,6 +15,7 @@
 #include "Kinematic.h"
 #include "FootSwingTrajectory.h"
 #include "ControlFSMData.h"
+#include <vector>
 
 struct ContactPlaneEstimate{
     Vec3<double> normal;
@@ -34,6 +35,13 @@ private:
     Eigen::Matrix<double, 3, 3> W;          // a single block of W in paper
     Eigen::Matrix<double, 3, 3> Kp_sw;
     Eigen::Matrix<double, 3, 3> Kd_sw;
+
+    Mat3<double> Kp_com;
+    Mat3<double> Kd_com;
+
+    Mat3<double> Kp_ori;
+    Mat3<double> Kd_ori;
+
     FootSwingTrajectory swing_traj[4]; // foot swing trajectory
     ContactPlaneEstimate contact_plane[4];
     ControlFSMData *control_data;
@@ -42,9 +50,13 @@ private:
     Vec3<double> des_com_pos;
     Vec3<double> des_angular_vel;
     RotMat<double> des_orientation;
-    Vec3<double> des_rpy;
 
-    int num_contacts;
+    Vec3<double> stand_des_com_pos;
+    Vec3<double> stand_des_rpy;
+
+    Vec3<double> f_ff[4];
+    unsigned long long iter;
+    std::vector<int> contact_idx;
     bool first_run;
     bool first_swing[4];
 
@@ -55,6 +67,8 @@ public:
     ~VMC() = default;
     explicit VMC(ControlFSMData *data);
     void initialize();
+
+    void compute_contact_force();
     void update_command();
     void run();
 };
