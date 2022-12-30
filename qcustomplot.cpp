@@ -15561,12 +15561,11 @@ void QCustomPlot::mousePressEvent(QMouseEvent *event)
   mMouseHasMoved = false;
   mMousePressPos = event->pos();
   
-  if (mSelectionRect && mSelectionRectMode != QCP::srmNone)
+  if (event->button() == Qt::LeftButton && mSelectionRect && mSelectionRectMode != QCP::srmNone)
   {
     if (mSelectionRectMode != QCP::srmZoom || qobject_cast<QCPAxisRect*>(axisRectAt(mMousePressPos))) // in zoom mode only activate selection rect if on an axis rect
       mSelectionRect->startSelection(event);
-  } else
-  {
+  } else if(event->button() != Qt::LeftButton){
     // no selection rect interaction, prepare for click signal emission and forward event to layerable under the cursor:
     QList<QVariant> details;
     QList<QCPLayerable*> candidates = layerableListAt(mMousePressPos, false, &details);
@@ -15588,7 +15587,6 @@ void QCustomPlot::mousePressEvent(QMouseEvent *event)
       }
     }
   }
-  
   event->accept(); // in case QCPLayerable reimplementation manipulates event accepted state. In QWidget event system, QCustomPlot wants to accept the event.
 }
 
@@ -15615,7 +15613,7 @@ void QCustomPlot::mouseMoveEvent(QMouseEvent *event)
     mSelectionRect->moveSelection(event);
   else if (mMouseEventLayerable) // call event of affected layerable:
     mMouseEventLayerable->mouseMoveEvent(event, mMousePressPos);
-  
+
   event->accept(); // in case QCPLayerable reimplementation manipulates event accepted state. In QWidget event system, QCustomPlot wants to accept the event.
 }
 
@@ -15678,7 +15676,6 @@ void QCustomPlot::mouseReleaseEvent(QMouseEvent *event)
   
   if (noAntialiasingOnDrag())
     replot(rpQueuedReplot);
-  
   event->accept(); // in case QCPLayerable reimplementation manipulates event accepted state. In QWidget event system, QCustomPlot wants to accept the event.
 }
 
@@ -18524,7 +18521,7 @@ void QCPAxisRect::layoutChanged()
 void QCPAxisRect::mousePressEvent(QMouseEvent *event, const QVariant &details)
 {
   Q_UNUSED(details)
-  if (event->buttons() & Qt::LeftButton)
+  if (event->buttons() & Qt::RightButton)
   {
     mDragging = true;
     // initialize antialiasing backup in case we start dragging:
@@ -18613,7 +18610,7 @@ void QCPAxisRect::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
 }
 
 /* inherits documentation from base class */
-void QCPAxisRect::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
+    void QCPAxisRect::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
 {
   Q_UNUSED(event)
   Q_UNUSED(startPos)
